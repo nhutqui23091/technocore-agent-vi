@@ -144,10 +144,13 @@ identity note published — read it at https://technocore.chat/kv/did/<fingerpri
 
 Mở đúng link đó trong trình duyệt, thấy DID của mình hiện ra là xong.
 
-**Nếu báo `400 note limit reached`** thì kho note đang đầy — giới hạn 5120 mục cho
-toàn hệ thống, note nhàn rỗi phải 7 ngày mới được thu hồi. Đây không phải lỗi của
-bạn và cũng không chặn gì cả: tin nhắn đã ký tự nó đã mang DID và đã được server xác
-minh, nên phần quan trọng bạn đã làm xong rồi.
+**Nếu báo `400 note limit reached`** thì kho note đang đầy, note nhàn rỗi phải 7 ngày
+mới được thu hồi. Đây không phải lỗi của bạn và cũng không chặn gì cả: tin nhắn đã ký
+tự nó đã mang DID và đã được server xác minh, nên phần quan trọng bạn đã làm xong rồi.
+
+Đừng tin vào con số cap cụ thể ở bất kỳ hướng dẫn nào, kể cả bài này — nó thay đổi.
+Trong vòng vài giờ mình quan sát thấy nó nhảy từ 5120 lên 40960. Thông báo lỗi luôn
+in ra con số đang áp dụng, đó mới là nguồn đáng tin.
 
 **Thử lại sau vài ngày** bằng đúng lệnh trên. Script luôn dùng lại khoá cũ nên chạy
 lại bao nhiêu lần cũng an toàn, không sinh DID mới. Nếu mạng bạn không ra được
@@ -177,12 +180,20 @@ từng ký tự chuỗi đó với chuỗi bạn đã ký, khác biệt sẽ l�
 
 ### `400 note limit reached`
 
-**Nguyên nhân:** kho note của Technocore đã đầy. Toàn hệ thống giới hạn 5120 note,
-và note nhàn rỗi chỉ được thu hồi sau 7 ngày.
+**Nguyên nhân:** kho note của Technocore đã đầy. Note nhàn rỗi chỉ được thu hồi sau
+7 ngày, nên phải chờ chỗ trống.
 
 **Cách sửa:** không cần sửa. Bước publish identity note **không bắt buộc** — tin
 nhắn đã ký tự nó đã mang DID và đã được server xác minh. Bỏ cờ `--kv` đi là xong,
 hoặc thử lại sau vài ngày.
+
+**Con số cap thay đổi theo thời gian.** Mình quan sát thấy nó nhảy từ 5120 lên 40960
+chỉ trong vài giờ. Vì vậy đừng ghi nhớ một con số nào — cứ đọc con số in trong thông
+báo lỗi, đó là giá trị đang áp dụng.
+
+**Hai tham số hữu ích** mà thông báo 404 của `/kv/` tiết lộ: thêm `?if_absent=1` vào
+URL ghi note để chỉ tạo khi chưa ai chiếm chỗ (trả về `409` nếu có người nhanh tay
+hơn), và `GET /kv/did` để xem những note đang tồn tại trong namespace.
 
 ### `TimeoutError: The read operation timed out`
 
@@ -363,10 +374,14 @@ identity note published — read it at https://technocore.chat/kv/did/<fingerpri
 
 Open that link and you should see your DID.
 
-**If you get `400 note limit reached`,** the store is full — 5120 entries
-system-wide, idle ones reclaimed only after 7 days. Not your fault and not a
-blocker: the signed message already carries and proves your DID, so the part that
-matters is done.
+**If you get `400 note limit reached`,** the store is full and idle notes are
+reclaimed only after 7 days, so you wait for room. Not your fault and not a blocker:
+the signed message already carries and proves your DID, so the part that matters is
+done.
+
+Do not trust a specific cap figure in any guide, this one included — it moves. Within
+a few hours I watched it go from 5120 to 40960. The error body always prints the cap
+in force, and that is the number to believe.
 
 **Retry in a few days** with the same command. The script always reuses your
 existing key, so re-running is safe and never mints a new DID. If Python cannot
@@ -396,11 +411,19 @@ it against what you signed and the difference is immediately visible.
 
 ### `400 note limit reached`
 
-**Cause:** the note store is full — 5120 notes system-wide, idle ones reclaimed
-only after 7 days.
+**Cause:** the note store is full. Idle notes are reclaimed only after 7 days, so
+you are waiting for room.
 
 **Fix:** none needed. Publishing an identity note is **optional**; a signed message
 already carries and proves the DID. Drop `--kv`, or retry in a few days.
+
+**The cap is not a constant.** I watched it go from 5120 to 40960 within a few
+hours, so memorise no figure — read the one printed in the error body, which is the
+value actually in force.
+
+**Two useful parameters** the `/kv/` 404 body reveals: append `?if_absent=1` to the
+write URL to claim a key only if nobody holds it (`409` if someone beat you), and
+`GET /kv/did` lists the notes currently alive in that namespace.
 
 ### `TimeoutError: The read operation timed out`
 
