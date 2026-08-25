@@ -1,64 +1,99 @@
 # Bài đăng X (bản dài, song ngữ)
 
-> Thay `nhutqui2309` trong link GitHub bằng username thật của bạn nếu khác.
-> Copy từ dòng dưới đường kẻ, dán thẳng vào X.
+> Copy từ dòng dưới đường kẻ ngang, dán thẳng vào X.
 
 ---
 
-Onboarding an agent to Technocore: three things the spec doesn't warn you about.
+How to put an agent on Technocore, and the three errors you may hit on the way.
 
-I set up a did:key agent on @flop_labs' Technocore this week. Three walls cost me an hour each. Writing them down so the next person skips them.
+@flop_labs runs Technocore as a chat service for AI agents, and the design is worth
+a look on its own: **every operation, writes included, is a single plain GET**. No
+signup, no API key, no SDK, not even a POST verb. An agent sandboxed down to "can
+fetch a URL" is a full peer. `did:key` signatures layer portable authorship on top —
+no users table, nothing for anyone to issue or revoke.
 
-**1. A trailing period breaks your signature.**
+**Getting on takes three steps.**
 
-Sign `lobby|<nonce>|…any SDK could.` and the server verifies `…any SDK could` — URL path normalisation eats the final dot before verification runs. You get `403 signature does not verify` with every other byte correct, which is a miserable thing to debug. Strip trailing dots before you sign.
+1 — Generate an Ed25519 keypair and encode the public key as `did:key:z6Mk...`.
+That is your identity; there is nothing to register.
 
-Credit where due: the 403 body prints the exact string the server expected. Diff it against what you signed and the difference jumps out. That is good error design.
+2 — Sign the string `<room>|<nonce>|<text>` with the private key and fetch
+`/r/<room>/say-signed/<did>/<sig>/<nonce>/<text>`. That is the whole write path.
 
-**2. The note store fills up.**
+3 — Check `technocore.chat/humans#r/lobby`. A verified message shows `<z6Mk…xxxx>`
+at the start of the line instead of a plain nick.
 
-Publishing an identity note to `/kv/did/<fingerprint>` can return `400 note limit reached` — 5120 notes system-wide, idle ones reclaimed after 7 days. Not a blocker: the step is optional. A signed message already carries the DID and proves it.
+**Three errors cost me an hour each.** Writing them down so the next person skips them.
 
-**3. Python may time out where the browser doesn't.**
+`403 signature does not verify` — if your message ends in a period, URL path
+normalisation eats the dot before verification runs. The server checks the string
+without it; you signed the one with it. Every other byte is correct, which makes it
+miserable to spot. Strip trailing dots. Credit where due: the 403 body prints the
+exact string the server expected, so a diff finds it instantly. Good error design.
 
-Depending on your route, urllib hangs while Chrome loads the site fine. The fix falls out of the protocol itself: print the signed URL, paste it into a browser. Every write is a plain GET, so it just works.
+`400 note limit reached` — the `/kv/` note store caps at 5120 system-wide and
+reclaims idle notes only after 7 days. Not a blocker: publishing an identity note is
+optional, since a signed message already carries and proves the DID.
 
-That last point is the whole design, not a workaround. Writes are GETs, so an agent sandboxed down to "can fetch a URL" is a full peer — no signup, no API key, no SDK, no POST verb. `did:key` signatures layer portable authorship on top: no users table, nothing for anyone to issue or revoke.
+`TimeoutError` from Python while the browser loads the site fine — depends on your
+route. The fix falls out of the protocol rather than working around it: print the
+signed URL and paste it into a browser. Writes are GETs, so it just works.
 
-Bilingual guide (Tiếng Việt + English) and script:
-github.com/nhutqui2309/technocore-agent-vi
+Bilingual guide (Tiếng Việt + English) and a script that handles all three:
+github.com/nhutqui23091/technocore-agent-vi
 
 My agent: `did:key:z6Mkibju6Ak94YR4xbGgfx4zcr8oPLhQwiySuTpPBuYphCht`
 
-One caution, stated plainly: Flop Labs has published no airdrop criteria, no tokenomics, no snapshot. Show up because the protocol is a genuinely neat piece of design. And a `did:key` is not a wallet — nothing legitimate will ever ask you for a seed phrase.
+One caution, stated plainly: Flop Labs has published no airdrop criteria, no
+tokenomics, no snapshot. Show up because the protocol is a neat piece of design. And
+a `did:key` is not a wallet — nothing legitimate will ever ask you for a seed phrase.
 
 ---
 
 **Tiếng Việt**
 
-Đưa agent lên Technocore: ba cái bẫy mà tài liệu không nói.
+Cách đưa một agent lên Technocore, và ba lỗi bạn có thể gặp trên đường.
 
-Tuần này mình dựng một agent `did:key` trên Technocore của @flop_labs. Ba chỗ vướng, mỗi chỗ mất cả tiếng. Ghi lại để người sau đỡ mất thời gian.
+@flop_labs vận hành Technocore như một chat service dành cho AI agent, và riêng
+thiết kế của nó đã đáng xem: **mọi thao tác, kể cả ghi, đều là một lệnh GET đơn
+giản**. Không đăng ký, không API key, không SDK, không cả method POST. Một agent bị
+nhốt trong sandbox chỉ fetch được URL vẫn là thành viên đầy đủ. Chữ ký `did:key`
+bổ sung quyền tác giả mang theo được — không bảng users, không ai cấp phát hay thu
+hồi được.
 
-**1. Dấu chấm cuối câu làm hỏng chữ ký.**
+**Lên mạng chỉ mất ba bước.**
 
-Bạn ký chuỗi kết thúc bằng `…any SDK could.` nhưng server lại xác minh chuỗi `…any SDK could` — dấu chấm cuối bị chuẩn hoá mất khỏi đường dẫn URL trước khi tới bước xác minh. Kết quả là `403 signature does not verify` trong khi mọi thứ khác đều đúng. Cực khó đoán. Cách xử lý: bỏ dấu chấm cuối trước khi ký.
+1 — Sinh cặp khoá Ed25519, mã hoá public key thành `did:key:z6Mk...`. Đó là danh
+tính của bạn, không cần đăng ký ở đâu cả.
 
-Điểm cộng cho Technocore: thông báo 403 in ra đúng chuỗi mà server mong đợi, so sánh với chuỗi mình đã ký là thấy ngay khác chỗ nào.
+2 — Ký chuỗi `<room>|<nonce>|<text>` bằng private key rồi fetch
+`/r/<room>/say-signed/<did>/<sig>/<nonce>/<text>`. Toàn bộ đường ghi chỉ có vậy.
 
-**2. Kho note có thể đầy.**
+3 — Kiểm tra tại `technocore.chat/humans#r/lobby`. Tin nhắn đã xác minh hiển thị
+`<z6Mk…xxxx>` ở đầu dòng thay vì một nick thường.
 
-Bước publish identity note vào `/kv/did/<fingerprint>` có thể trả về `400 note limit reached` — toàn hệ thống giới hạn 5120 note, note nhàn rỗi 7 ngày mới được thu hồi. Không sao cả: bước này không bắt buộc, vì tin nhắn đã ký tự nó đã mang và chứng minh DID rồi.
+**Ba lỗi khiến mình mất mỗi cái cả tiếng.** Ghi lại để người sau đỡ mất thời gian.
 
-**3. Python có thể timeout trong khi trình duyệt vẫn vào được.**
+`403 signature does not verify` — nếu tin nhắn kết thúc bằng dấu chấm, dấu chấm đó
+bị chuẩn hoá mất khỏi đường dẫn URL trước khi server xác minh. Server kiểm chuỗi
+không có dấu chấm, còn bạn đã ký chuỗi có. Mọi byte khác đều đúng nên cực khó phát
+hiện. Cách xử lý: bỏ dấu chấm cuối. Điểm cộng cho Technocore: thân lỗi 403 in ra
+đúng chuỗi server mong đợi, so sánh là thấy ngay.
 
-Tuỳ đường mạng, urllib treo còn Chrome mở bình thường. Cách khắc phục nằm sẵn trong thiết kế giao thức: in ra URL đã ký rồi dán vào trình duyệt. Mọi thao tác ghi đều là GET nên chạy ngon lành.
+`400 note limit reached` — kho note `/kv/` giới hạn 5120 cho toàn hệ thống, note
+nhàn rỗi 7 ngày mới được thu hồi. Không phải vấn đề: bước publish identity note vốn
+không bắt buộc, vì tin nhắn đã ký tự nó đã mang và chứng minh DID.
 
-Và đó chính là điểm hay nhất của Technocore chứ không phải mẹo chữa cháy. Ghi cũng là GET, nên một agent bị nhốt trong sandbox chỉ fetch được URL vẫn là thành viên đầy đủ — không đăng ký, không API key, không SDK, không cả method POST. Chữ ký `did:key` bổ sung quyền tác giả mang theo được: không bảng users, không ai cấp phát hay thu hồi được.
+`TimeoutError` từ Python trong khi trình duyệt vẫn vào được — tuỳ đường mạng. Cách
+khắc phục nằm sẵn trong thiết kế giao thức chứ không phải mẹo chữa cháy: in ra URL
+đã ký rồi dán vào trình duyệt. Ghi cũng là GET nên chạy ngon lành.
 
-Hướng dẫn song ngữ và script:
-github.com/nhutqui2309/technocore-agent-vi
+Hướng dẫn song ngữ và script xử lý sẵn cả ba lỗi:
+github.com/nhutqui23091/technocore-agent-vi
 
 Agent của mình: `did:key:z6Mkibju6Ak94YR4xbGgfx4zcr8oPLhQwiySuTpPBuYphCht`
 
-Một lưu ý nói thẳng: Flop Labs chưa công bố tiêu chí airdrop, chưa có tokenomics, chưa có snapshot nào. Hãy tham gia vì giao thức này được thiết kế thú vị, đừng vì một phần thưởng chưa ai định nghĩa. Và `did:key` không phải ví crypto — không có bước hợp lệ nào cần bạn nhập seed phrase.
+Một lưu ý nói thẳng: Flop Labs chưa công bố tiêu chí airdrop, chưa có tokenomics,
+chưa có snapshot nào. Hãy tham gia vì giao thức này được thiết kế thú vị, đừng vì
+một phần thưởng chưa ai định nghĩa. Và `did:key` không phải ví crypto — không có
+bước hợp lệ nào cần bạn nhập seed phrase.
