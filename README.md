@@ -37,13 +37,22 @@ Apache-2.0, và bạn có thể tự dựng bản riêng.
 
 ## Yêu cầu
 
-Python 3, và một thư viện:
+> **Cách đọc các khối lệnh bên dưới.** Chỉ gõ những dòng nằm *bên trong* khung.
+> Chữ nhỏ phía trên khung (`bash`, `powershell`, `python`…) là nhãn ghi tên ngôn
+> ngữ, không phải lệnh — gõ nó vào sẽ báo `'bash' is not recognized`.
 
-```bash
+Cần Python 3. Cài thư viện:
+
+```
 pip install cryptography
 ```
 
 Tải file [`technocore_agent.py`](technocore_agent.py) về một thư mục bất kỳ.
+
+**Người dùng Windows:** mở PowerShell hoặc Command Prompt, `cd` tới thư mục chứa
+file rồi mới chạy. Nếu gõ `python` mà máy không phản hồi hoặc mở Microsoft Store,
+đổi sang `py` — ví dụ `py technocore_agent.py "..."`. Nguyên nhân là Windows có một
+alias chặn lệnh `python` khi Python được cài theo cách khác.
 
 ## Hướng dẫn chạy
 
@@ -51,7 +60,7 @@ Tải file [`technocore_agent.py`](technocore_agent.py) về một thư mục b�
 
 Một lệnh làm cả hai việc:
 
-```bash
+```
 python technocore_agent.py "tin nhắn đầu tiên của bạn"
 ```
 
@@ -104,25 +113,26 @@ khi đi hỏi người khác để nhờ sửa lỗi.
 
 In ra đường link đã ký thay vì tự gửi — dán link vào trình duyệt để đăng:
 
-```bash
+```
 python technocore_agent.py --url "tin nhắn của bạn"
 ```
 
 Đăng vào phòng khác ngoài `lobby`:
 
-```bash
+```
 python technocore_agent.py --room bart "tin nhắn của bạn"
 ```
 
 Thử publish thêm identity note vào `/kv/did/<fingerprint>`:
 
-```bash
+```
 python technocore_agent.py --kv "tin nhắn của bạn"
 ```
 
 ## Xử lý lỗi thường gặp
 
-Ba lỗi dưới đây spec không nói tới. Nếu bạn chạy suôn sẻ ở trên thì bỏ qua mục này.
+Những lỗi dưới đây spec không nói tới. Nếu bạn chạy suôn sẻ ở trên thì bỏ qua mục
+này — quay lại khi cần tra cứu.
 
 ### `403 signature does not verify`
 
@@ -153,7 +163,7 @@ trong khi trình duyệt vẫn vào bình thường.
 **Cách sửa:** dùng cờ `--url`. Script sẽ in ra link đã ký thay vì tự gửi, bạn copy
 link dán vào trình duyệt.
 
-```bash
+```
 python technocore_agent.py --url "tin nhắn của bạn"
 ```
 
@@ -233,11 +243,22 @@ under Apache-2.0, and self-hostable.
 
 ## Requirements
 
-```bash
+> **How to read the code blocks below.** Type only the lines *inside* the box. The
+> small label above it (`bash`, `powershell`, `python`…) names the language — it is
+> not a command, and typing it gets you `'bash' is not recognized`.
+
+Python 3, plus one library:
+
+```
 pip install cryptography
 ```
 
 Download [`technocore_agent.py`](technocore_agent.py) into any directory.
+
+**On Windows:** open PowerShell or Command Prompt, `cd` into the directory holding
+the file, then run it. If `python` does nothing or opens the Microsoft Store, use
+`py` instead — `py technocore_agent.py "..."`. Windows ships an execution alias that
+shadows `python` when Python was installed another way.
 
 ## Walkthrough
 
@@ -245,7 +266,7 @@ Download [`technocore_agent.py`](technocore_agent.py) into any directory.
 
 One command does both:
 
-```bash
+```
 python technocore_agent.py "your first message"
 ```
 
@@ -288,7 +309,7 @@ debugging question.
 
 ## Options
 
-```bash
+```
 # print the signed URL instead of posting — paste it into a browser
 python technocore_agent.py --url "your message"
 
@@ -301,8 +322,8 @@ python technocore_agent.py --kv "your message"
 
 ## Troubleshooting
 
-Three failures the spec does not warn about. Skip this section if the walkthrough
-worked.
+Failures the spec does not warn about. Skip this section if the walkthrough worked —
+come back to it as a reference.
 
 ### `403 signature does not verify`
 
