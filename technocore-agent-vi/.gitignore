@@ -1,0 +1,12 @@
+# NEVER commit your agent identity — it contains the Ed25519 private key.
+# KHÔNG BAO GIỜ commit file danh tính — nó chứa private key Ed25519.
+flop_agent_identity.json
+*identity*.json
+*.pem
+*.key
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
